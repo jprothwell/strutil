@@ -29,7 +29,7 @@ const unsigned UNICODE_MAX_LEGAL_UTF32 = 0x0010FFFF;
 const unsigned UNICODE_REPLACEMENT_CHAR = 0x0000FFFD;
 
 /* Implementation-only: UTF-8 first byte encoding table. */
-static const char s_firstByteMarks[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+static const unsigned char s_firstByteMarks[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
 
 /* Implementation-only: Magic values subtracted from a buffer value during uint8_t conversion. */
 static const unsigned s_offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL, 0x03C82080UL, 0xFA082080UL, 0x82082080UL };
@@ -47,7 +47,7 @@ inline int u8_encode( unsigned ch, char* target )
 		bytes = 1;
 	else if ( ch < 0x800 ) 
 		bytes = 2;
-	if ( ch < 0x10000 )
+	else if ( ch < 0x10000 )
 		bytes = 3;
 	else if ( ch <= UNICODE_MAX_LEGAL_UTF32 )
 		bytes = 4;
@@ -72,6 +72,7 @@ inline int u8_encode( unsigned ch, char* target )
  */
 template <class It> inline int u8_chsize( It source )
 {
+	const unsigned ch = (unsigned char)*source;
 	if ( ch < 192 )
 		return 1;
 	else if ( ch < 224 )
@@ -94,41 +95,41 @@ template <class It> inline int u8_chsize( It source )
  */
 template <class It> inline unsigned u8_decode( It source, int* bytes=0 )
 {
-	const int trail = u8_chsize(source) - 1;
+	const int chsize = u8_chsize(source);
+	const int trail = chsize - 1;
 	register unsigned ch = 0;
 	switch (trail)
 	{
-	case 5: ch += *source++; ch <<= 6;
-	case 4: ch += *source++; ch <<= 6;
-	case 3: ch += *source++; ch <<= 6;
-	case 2: ch += *source++; ch <<= 6;
-	case 1: ch += *source++; ch <<= 6;
-	case 0: ch += *source++;
+	case 5: ch += (unsigned char)*source++; ch <<= 6;
+	case 4: ch += (unsigned char)*source++; ch <<= 6;
+	case 3: ch += (unsigned char)*source++; ch <<= 6;
+	case 2: ch += (unsigned char)*source++; ch <<= 6;
+	case 1: ch += (unsigned char)*source++; ch <<= 6;
+	case 0: ch += (unsigned char)*source++;
 	}
 	ch -= s_offsetsFromUTF8[trail];
 
 	if (bytes)
-		*bytes = trail+1;
+		*bytes = chsize;
 	return ch;
 }
 
 /** 
- * Returns nth Unicode codepoint from UTF-8 string or UNICODE_REPLACEMENT_CHAR if invalid encoding.
+ * Returns nth Unicode codepoint from UTF-8 string.
  * Note: This convenience function is O(n) so use u8_decode as optimization if performance critical code or long strings.
  */
-template <class S> unsigned u8_get( const S& s, S::size_type n )
+template <class S> unsigned u8_get( const S& s, typename S::size_type n )
 {
 	S::const_iterator it = s.begin();
-	S::const_iterator end = s.begin() + n;
-	while ( it < end )
+	for ( S::size_type i = 0 ; i < n ; ++i )
 		it += u8_chsize( it );
-	return it == end ? u8_decode(it) : UNICODE_REPLACEMENT_CHAR;
+	return u8_decode(it);
 }
 
 /** 
  * Returns length of UTF-8 string in Unicode codepoints.
  */
-template <class S> S::size_type u8_len( const S& s )
+template <class S> typename S::size_type u8_len( const S& s )
 {
 	S::const_iterator it = s.begin();
 	S::const_iterator end = s.end();
