@@ -142,6 +142,17 @@ template <class S> typename S::size_type u8_len( const S& s )
 	return n;
 }
 
+/*
+trim
+ltrim
+rtrim
+explode
+implode
+strtolower
+strtoupper
+format
+*/
+
 } // str
 
 #endif // _STR_STRUTIL_H
