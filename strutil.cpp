@@ -31,7 +31,7 @@ static const unsigned char s_firstByteMarks[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0,
 /* Magic values subtracted from a buffer value during uint8_t conversion. */
 static const unsigned s_offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL, 0x03C82080UL, 0xFA082080UL, 0x82082080UL };
 
-int u8_encode( unsigned ch, char* target )
+int utf8_encode( unsigned ch, char* target )
 {
 	register int bytes = 0;
 	if ( ch < 0x80 )
@@ -58,9 +58,9 @@ int u8_encode( unsigned ch, char* target )
 	return bytes;
 }
 
-unsigned u8_decode( const char* source, int* bytes )
+unsigned utf8_decode( const char* source, int* bytes )
 {
-	const int chsize = u8_chsize(source);
+	const int chsize = utf8_chsize(source);
 	const int trail = chsize - 1;
 	register unsigned ch = 0;
 	switch (trail)
@@ -79,7 +79,7 @@ unsigned u8_decode( const char* source, int* bytes )
 	return ch;
 }
 
-int u8_chsize( const char* source )
+int utf8_chsize( const char* source )
 {
 	const unsigned ch = (unsigned char)*source;
 	if ( ch < 192 )
@@ -96,15 +96,15 @@ int u8_chsize( const char* source )
 		return 6;
 }
 
-unsigned u8_get( const string_type& s, size_type n )
+unsigned utf8_getch( const string_type& s, size_type n )
 {
 	const char* it = s.c_str();
 	for ( size_type i = 0 ; i < n ; ++i )
-		it += u8_chsize( it );
-	return u8_decode(it);
+		it += utf8_chsize( it );
+	return utf8_decode(it);
 }
 
-size_type u8_len( const string_type& s )
+size_type utf8_len( const string_type& s )
 {
 	const char* it = s.c_str();
 	size_type n = 0;
@@ -112,7 +112,7 @@ size_type u8_len( const string_type& s )
 	while ( *it )
 	{
 		++n;
-		it += u8_chsize( it );
+		it += utf8_chsize( it );
 	}
 	return n;
 }
@@ -176,10 +176,10 @@ string_type	uppercase( const string_type& s )
 	{
 		int bytes;
 		char buf[8];
-		unsigned ch = u8_decode( p, &bytes );
+		unsigned ch = utf8_decode( p, &bytes );
 		p += bytes;
 		ch = STRUTIL_TOUPPER( ch );
-		bytes = u8_encode( ch, buf );
+		bytes = utf8_encode( ch, buf );
 		vec.insert( vec.end(), buf, buf+bytes );
 	}
 	vec.push_back( 0 );
@@ -195,10 +195,41 @@ string_type	lowercase( const string_type& s )
 	{
 		int bytes;
 		char buf[8];
-		unsigned ch = u8_decode( p, &bytes );
+		unsigned ch = utf8_decode( p, &bytes );
 		p += bytes;
 		ch = STRUTIL_TOLOWER( ch );
-		bytes = u8_encode( ch, buf );
+		bytes = utf8_encode( ch, buf );
+		vec.insert( vec.end(), buf, buf+bytes );
+	}
+	vec.push_back( 0 );
+	return string_type( &vec[0] );
+}
+
+wstring_type from_utf8( const string_type& s )
+{
+	wchar_vector_type vec;
+	vec.reserve( s.length()+1 );
+
+	for ( const char* p = s.c_str() ; *p ; )
+	{
+		int bytes;
+		unsigned ch = utf8_decode( p, &bytes );
+		p += bytes;
+		vec.push_back( ch );
+	}
+	vec.push_back( 0 );
+	return wstring_type( &vec[0] );
+}
+
+string_type	to_utf8( const wstring_type& s )
+{
+	char_vector_type vec;
+	vec.reserve( s.length()*2+1 );
+
+	for ( const wchar_type* p = s.c_str() ; *p ; ++p )
+	{
+		char buf[8];
+		int bytes = utf8_encode( *p, buf );
 		vec.insert( vec.end(), buf, buf+bytes );
 	}
 	vec.push_back( 0 );

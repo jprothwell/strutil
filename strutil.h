@@ -7,6 +7,17 @@
 #include <string>
 #endif
 
+// strutil uses std::wstring if STRUTIL_WSTRING not defined
+#ifndef STRUTIL_WSTRING
+#define STRUTIL_WSTRING std::wstring
+#include <string>
+#endif
+
+// strutil uses wchar_t if STRUTIL_WCHAR not defined
+#ifndef STRUTIL_WCHAR
+#define STRUTIL_WCHAR wchar_t
+#endif
+
 // strutil uses std::vector if STRUTIL_VECTOR not defined
 #ifndef STRUTIL_VECTOR
 #define STRUTIL_VECTOR std::vector
@@ -19,8 +30,17 @@ namespace str
 /** String type. */
 typedef STRUTIL_STRING				string_type;
 
+/** Wide character type. */
+typedef STRUTIL_WCHAR				wchar_type;
+
+/** Wide character string type. */
+typedef STRUTIL_WSTRING				wstring_type;
+
 /** Vector of chars container type. */
 typedef STRUTIL_VECTOR<char>		char_vector_type;
+
+/** Vector of wchars container type. */
+typedef STRUTIL_VECTOR<wchar_type>	wchar_vector_type;
 
 /** Vector of strings container type. */
 typedef STRUTIL_VECTOR<string_type>	string_vector_type;
@@ -31,13 +51,23 @@ typedef string_type::size_type		size_type;
 /** Character used to replace invalid UTF-8 data. */
 const unsigned		UNICODE_REPLACEMENT_CHAR = 0x0000FFFD;
 
+/**
+ * Decodes UTF-8 encoded string as Unicode code point array.
+ */
+wstring_type		from_utf8( const string_type& s );
+
+/**
+ * Encodes Unicode code point array to UTF-8 encoded string.
+ */
+string_type			to_utf8( const wstring_type& s );
+
 /** 
  * Encodes Unicode codepoint to UTF-8. 
  * @param cp Unicode codepoint
  * @param target [out] Receives UTF-8 bytes. Buffer receives UNICODE_REPLACEMENT_CHAR if input is invalid. Buffer size must be at least 6 bytes.
  * @return No.of bytes encoded.
  */
-int					u8_encode( unsigned ch, char* target );
+int					utf8_encode( unsigned ch, char* target );
 
 /**
  * Decodes UTF-8 to Unicode codepoint.
@@ -45,26 +75,26 @@ int					u8_encode( unsigned ch, char* target );
  * @param bytes [out] Receives (if not nullptr) no.of bytes read.
  * @return Unicode codepoint.
  */
-unsigned			u8_decode( const char* source, int* bytes=0 );
+unsigned			utf8_decode( const char* source, int* bytes=0 );
 
 /**
  * Returns length in bytes of UTF-8 encoded codepoint.
  * Requirements: Derefencing operator must return type which can be casted to unsigned char.
  */
-int					u8_chsize( const char* source );
+int					utf8_chsize( const char* source );
 
 /** 
  * Returns nth Unicode codepoint from UTF-8 string.
  * Requirements: String type must support begin() and end() and it must have const_iterator type defined.
- * Note: This convenience function is O(n) so use u8_decode as optimization if performance critical code or long strings.
+ * Note: This convenience function is O(n) so use utf8_decode as optimization if performance critical code or long strings.
  */
-unsigned			u8_get( const string_type& s, size_type n );
+unsigned			utf8_getch( const string_type& s, size_type n );
 
 /** 
  * Returns length of UTF-8 string in Unicode codepoints.
  * Requirements: String type must support begin() and end() and it must have const_iterator type defined.
  */
-size_type			u8_len( const string_type& s );
+size_type			utf8_len( const string_type& s );
 
 /**
  * sprintf to string object.
@@ -72,27 +102,32 @@ size_type			u8_len( const string_type& s );
 string_type			ssprintf( const char* fmt, ... );
 
 /**
- * Trims whitespace off from both ends of the string.
+ * Trims whitespace off from both ends of the string. Note that by default implementation (see readme) only ASCII-7 whitespace is considered,
+ * but the function still assumes string is UTF-8 encoded.
  */
 string_type			trim( const string_type& s );
 
 /**
- * Trims whitespace off from the beginning of the string.
+ * Trims whitespace off from the beginning of the string. Note that by default implementation (see readme) only ASCII-7 whitespace is considered,
+ * but the function still assumes string is UTF-8 encoded.
  */
 string_type			ltrim( const string_type& s );
 
 /**
- * Trims whitespace off from the end of the string.
+ * Trims whitespace off from the end of the string. Note that by default implementation (see readme) only ASCII-7 whitespace is considered,
+ * but the function still assumes string is UTF-8 encoded.
  */
 string_type			rtrim( const string_type& s );
 
 /**
- * Returns string in uppercase.
+ * Returns string in uppercase. Note that by default implementation (see readme) only ASCII-7 characters are converted,
+ * but the function still assumes string is UTF-8 encoded.
  */
 string_type			uppercase( const string_type& s );
 
 /**
- * Returns string in lowercase.
+ * Returns string in lowercase. Note that by default implementation (see readme) only ASCII-7 characters are converted,
+ * but the function still assumes string is UTF-8 encoded.
  */
 string_type			lowercase( const string_type& s );
 

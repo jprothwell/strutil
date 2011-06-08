@@ -34,14 +34,14 @@ void strutil_test()
 	fclose(fh);
 	string_type s = &file[0];
 
-	unsigned ch = u8_get(s,1);
+	unsigned ch = utf8_getch(s,1);
 	check( ch == 228 );
-	check( ch == u8_get(s,3) );
-	check( u8_len(s) == 28 );
+	check( ch == utf8_getch(s,3) );
+	check( utf8_len(s) == 28 );
 	char buf[8];
-	int bytes = u8_encode( 228, buf );
+	int bytes = utf8_encode( 228, buf );
 	check( bytes == 2 );
-	check( u8_decode(buf) == 228 );
+	check( utf8_decode(buf) == 228 );
 	check( trim("a bc") == "a bc" );
 	check( trim("a bc  ") == "a bc" );
 	check( trim("  a bc  ") == "a bc" );
