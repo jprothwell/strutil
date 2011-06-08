@@ -21,4 +21,5 @@ Changes
 -------
 
 v1.1.0:
-+ added utf8_encode/decode which
++ added higher level to_utf8/from_utf8
+
