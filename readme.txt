@@ -1,4 +1,4 @@
-strutil ver. 1.1.0
+strutil ver. 1.1.1
 ********************
 
 Minimalistic library improving C++ string support with UTF-8 and string handling functions.
@@ -19,6 +19,9 @@ Licensed under BSD/MIT license. See http://code.google.com/p/strutil/
 
 Changes
 -------
+
+v1.1.1:
++ couple of optimizations
 
 v1.1.0:
 + added higher level to_utf8/from_utf8

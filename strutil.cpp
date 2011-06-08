@@ -182,8 +182,7 @@ string_type	uppercase( const string_type& s )
 		bytes = utf8_encode( ch, buf );
 		vec.insert( vec.end(), buf, buf+bytes );
 	}
-	vec.push_back( 0 );
-	return string_type( &vec[0] );
+	return string_type( vec.begin(), vec.end() );
 }
 
 string_type	lowercase( const string_type& s )
@@ -201,8 +200,7 @@ string_type	lowercase( const string_type& s )
 		bytes = utf8_encode( ch, buf );
 		vec.insert( vec.end(), buf, buf+bytes );
 	}
-	vec.push_back( 0 );
-	return string_type( &vec[0] );
+	return string_type( vec.begin(), vec.end() );
 }
 
 wstring_type from_utf8( const string_type& s )
@@ -217,8 +215,7 @@ wstring_type from_utf8( const string_type& s )
 		p += bytes;
 		vec.push_back( ch );
 	}
-	vec.push_back( 0 );
-	return wstring_type( &vec[0] );
+	return wstring_type( vec.begin(), vec.end() );
 }
 
 string_type	to_utf8( const wstring_type& s )
@@ -232,8 +229,7 @@ string_type	to_utf8( const wstring_type& s )
 		int bytes = utf8_encode( *p, buf );
 		vec.insert( vec.end(), buf, buf+bytes );
 	}
-	vec.push_back( 0 );
-	return string_type( &vec[0] );
+	return string_type( vec.begin(), vec.end() );
 }
 
 } // str
