@@ -75,6 +75,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\example.cpp" />
+    <ClCompile Include="..\strutil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\strutil.h" />
