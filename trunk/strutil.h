@@ -52,12 +52,12 @@ typedef string_type::size_type		size_type;
 const unsigned		UNICODE_REPLACEMENT_CHAR = 0x0000FFFD;
 
 /**
- * Decodes UTF-8 encoded string as Unicode code point array.
+ * Decodes UTF-8 string to wide character string.
  */
-wstring_type		from_utf8( const string_type& s );
+wstring_type		to_wcs( const string_type& s );
 
 /**
- * Encodes Unicode code point array to UTF-8 encoded string.
+ * Encodes wide character string to UTF-8 encoded string.
  */
 string_type			to_utf8( const wstring_type& s );
 
@@ -88,7 +88,7 @@ int					utf8_chsize( const char* source );
  * Requirements: String type must support begin() and end() and it must have const_iterator type defined.
  * Note: This convenience function is O(n) so use utf8_decode as optimization if performance critical code or long strings.
  */
-unsigned			utf8_getch( const string_type& s, size_type n );
+unsigned			utf8_at( const string_type& s, size_type n );
 
 /** 
  * Returns length of UTF-8 string in Unicode codepoints.

@@ -142,6 +142,7 @@
     <ClInclude Include="..\strutil.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\data.txt" />
     <None Include="..\readme.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

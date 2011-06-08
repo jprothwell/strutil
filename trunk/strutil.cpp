@@ -96,7 +96,7 @@ int utf8_chsize( const char* source )
 		return 6;
 }
 
-unsigned utf8_getch( const string_type& s, size_type n )
+unsigned utf8_at( const string_type& s, size_type n )
 {
 	const char* it = s.c_str();
 	for ( size_type i = 0 ; i < n ; ++i )
@@ -203,7 +203,7 @@ string_type	lowercase( const string_type& s )
 	return string_type( vec.begin(), vec.end() );
 }
 
-wstring_type from_utf8( const string_type& s )
+wstring_type to_wcs( const string_type& s )
 {
 	wchar_vector_type vec;
 	vec.reserve( s.length()+1 );

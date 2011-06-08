@@ -34,9 +34,9 @@ void strutil_test()
 	fclose(fh);
 	string_type s = &file[0];
 
-	unsigned ch = utf8_getch(s,1);
+	unsigned ch = utf8_at(s,1);
 	check( ch == 228 );
-	check( ch == utf8_getch(s,3) );
+	check( ch == utf8_at(s,3) );
 	check( utf8_len(s) == 28 );
 	char buf[8];
 	int bytes = utf8_encode( 228, buf );
@@ -59,6 +59,7 @@ void strutil_test()
 	check( lowercase("AbCd") == "abcd" );
 	check( uppercase("AbCdäÖ") == "ABCDäÖ" );
 	check( lowercase("AbCdäÖ") == "abcdäÖ" );
+	check( to_wcs(to_utf8(to_wcs(trim(s)))) == to_wcs("Tämä on UTF-8 tekstitiedosto") );
 
 	string_vector_type e = explode( ",", "jani,markus,kajala," );
 	check( e.size() == 4 );
