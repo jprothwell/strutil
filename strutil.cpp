@@ -1,0 +1,210 @@
+#include "strutil.h"
+#include <stdarg.h>
+
+// strutil uses default tolower if STRUTIL_TOLOWER not defined
+#ifndef STRUTIL_TOLOWER
+#define STRUTIL_TOLOWER(C) ( ((C)&~0x7F) ? (C) : tolower(C) )
+#include <ctype.h>
+#endif
+
+// strutil uses toupper if STRUTIL_TOUPPER not defined
+#ifndef STRUTIL_TOUPPER
+#define STRUTIL_TOUPPER(C) ( ((C)&~0x7F) ? (C) : toupper(C) )
+#include <ctype.h>
+#endif
+
+// strutil uses isspace is STRUTIL_ISSPACE not defined
+#ifndef STRUTIL_ISSPACE
+#define STRUTIL_ISSPACE(C) ( ((C)&~0x7F) ? false : isspace(C) != 0 )
+#include <ctype.h>
+#endif
+
+namespace str
+{
+
+/* Maximum Unicode UTF-32 value */
+static const unsigned UNICODE_MAX_LEGAL_UTF32 = 0x0010FFFF;
+
+/* UTF-8 first byte encoding table. */
+static const unsigned char s_firstByteMarks[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
+
+/* Magic values subtracted from a buffer value during uint8_t conversion. */
+static const unsigned s_offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL, 0x03C82080UL, 0xFA082080UL, 0x82082080UL };
+
+int u8_encode( unsigned ch, char* target )
+{
+	register int bytes = 0;
+	if ( ch < 0x80 )
+		bytes = 1;
+	else if ( ch < 0x800 ) 
+		bytes = 2;
+	else if ( ch < 0x10000 )
+		bytes = 3;
+	else if ( ch <= UNICODE_MAX_LEGAL_UTF32 )
+		bytes = 4;
+	else
+		bytes = 3, ch = UNICODE_REPLACEMENT_CHAR;
+
+	const unsigned bytemask = 0xBF;
+	const unsigned bytemark = 0x80;
+	target += bytes;
+	switch (bytes)
+	{
+	    case 4: *--target = (char)((ch | bytemark) & bytemask); ch >>= 6;
+	    case 3: *--target = (char)((ch | bytemark) & bytemask); ch >>= 6;
+	    case 2: *--target = (char)((ch | bytemark) & bytemask); ch >>= 6;
+	    case 1: *--target = (char) (ch | s_firstByteMarks[bytes]);
+	}
+	return bytes;
+}
+
+unsigned u8_decode( const char* source, int* bytes )
+{
+	const int chsize = u8_chsize(source);
+	const int trail = chsize - 1;
+	register unsigned ch = 0;
+	switch (trail)
+	{
+	case 5: ch += (unsigned char)*source++; ch <<= 6;
+	case 4: ch += (unsigned char)*source++; ch <<= 6;
+	case 3: ch += (unsigned char)*source++; ch <<= 6;
+	case 2: ch += (unsigned char)*source++; ch <<= 6;
+	case 1: ch += (unsigned char)*source++; ch <<= 6;
+	case 0: ch += (unsigned char)*source++;
+	}
+	ch -= s_offsetsFromUTF8[trail];
+
+	if (bytes)
+		*bytes = chsize;
+	return ch;
+}
+
+int u8_chsize( const char* source )
+{
+	const unsigned ch = (unsigned char)*source;
+	if ( ch < 192 )
+		return 1;
+	else if ( ch < 224 )
+		return 2;
+	else if ( ch < 240 )
+		return 3;
+	else if ( ch < 248 )
+		return 4;
+	else if ( ch < 252 )
+		return 5;
+	else
+		return 6;
+}
+
+unsigned u8_get( const string_type& s, size_type n )
+{
+	const char* it = s.c_str();
+	for ( size_type i = 0 ; i < n ; ++i )
+		it += u8_chsize( it );
+	return u8_decode(it);
+}
+
+size_type u8_len( const string_type& s )
+{
+	const char* it = s.c_str();
+	size_type n = 0;
+
+	while ( *it )
+	{
+		++n;
+		it += u8_chsize( it );
+	}
+	return n;
+}
+
+string_type ssprintf( const char* fmt, ... )
+{
+	char msgbuf[2048];
+	va_list marker;
+	va_start( marker, fmt );
+#ifdef _WIN32
+	vsprintf_s( msgbuf, sizeof(msgbuf), fmt, marker );
+#else
+	vsnprintf( msgbuf, sizeof(msgbuf), fmt, marker );
+#endif
+	va_end( marker );
+	msgbuf[sizeof(msgbuf)-1] = 0;
+	return string_type( msgbuf );
+}
+
+string_type	trim( const string_type& s )
+{
+	size_type i1 = s.length();
+	size_type i0 = 0;
+	while ( i0 < i1 && STRUTIL_ISSPACE((unsigned char)s.at(i0)) )
+		++i0;
+	while ( i1 > 0 && STRUTIL_ISSPACE((unsigned char)s.at(i1-1)) )
+		--i1;
+	return i0 < i1 ? s.substr(i0,i1-i0) : "";
+}
+
+string_type	ltrim( const string_type& s )
+{
+	const size_type i1 = s.length();
+	size_type i0 = 0;
+	while ( i0 < i1 && STRUTIL_ISSPACE((unsigned char)s.at(i0)) )
+		++i0;
+	return i0 < i1 ? s.substr(i0,i1-i0) : "";
+}
+
+string_type	rtrim( const string_type& s )
+{
+	size_type i1 = s.length();
+	while ( i1 > 0 && STRUTIL_ISSPACE((unsigned char)s.at(i1-1)) )
+		--i1;
+	return 0 < i1 ? s.substr(0,i1) : "";
+}
+
+string_vector_type explode( const string_type& delim, const string_type& input )	
+{
+	string_vector_type out; 
+	explode(delim,input,out); 
+	return out;
+}
+
+string_type	uppercase( const string_type& s )
+{
+	char_vector_type vec;
+	vec.reserve( s.length()+1 );
+
+	for ( const char* p = s.c_str() ; *p ; )
+	{
+		int bytes;
+		char buf[8];
+		unsigned ch = u8_decode( p, &bytes );
+		p += bytes;
+		ch = STRUTIL_TOUPPER( ch );
+		bytes = u8_encode( ch, buf );
+		vec.insert( vec.end(), buf, buf+bytes );
+	}
+	vec.push_back( 0 );
+	return string_type( &vec[0] );
+}
+
+string_type	lowercase( const string_type& s )
+{
+	char_vector_type vec;
+	vec.reserve( s.length()+1 );
+
+	for ( const char* p = s.c_str() ; *p ; )
+	{
+		int bytes;
+		char buf[8];
+		unsigned ch = u8_decode( p, &bytes );
+		p += bytes;
+		ch = STRUTIL_TOLOWER( ch );
+		bytes = u8_encode( ch, buf );
+		vec.insert( vec.end(), buf, buf+bytes );
+	}
+	vec.push_back( 0 );
+	return string_type( &vec[0] );
+}
+
+} // str
+
+// strutil library is copyright (C) 2009-2011 Jani Kajala (kajala@gmail.com). Licensed under BSD/MIT license. See http://code.google.com/p/strutil/

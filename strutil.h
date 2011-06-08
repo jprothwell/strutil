@@ -1,91 +1,43 @@
 #ifndef _STR_STRUTIL_H
 #define _STR_STRUTIL_H
 
-// uses std::vector if STRUTIL_VECTOR not defined
+// strutil uses std::string if STRUTIL_STRING not defined
+#ifndef STRUTIL_STRING
+#define STRUTIL_STRING std::string
+#include <string>
+#endif
+
+// strutil uses std::vector if STRUTIL_VECTOR not defined
 #ifndef STRUTIL_VECTOR
 #define STRUTIL_VECTOR std::vector
 #include <vector>
 #endif
 
-// uses default tolower if STRUTIL_TOLOWER not defined
-#ifndef STRUTIL_TOLOWER
-#define STRUTIL_TOLOWER tolower
-#include <ctype.h>
-#endif
-
-// uses default toupper if STRUTIL_TOUPPER not defined
-#ifndef STRUTIL_TOUPPER
-#define STRUTIL_TOUPPER toupper
-#include <ctype.h>
-#endif
-
 namespace str
 {
 
-/** maximum Unicode UTF-32 value */
-const unsigned UNICODE_MAX_LEGAL_UTF32 = 0x0010FFFF;
+/** String type. */
+typedef STRUTIL_STRING				string_type;
+
+/** Vector of chars container type. */
+typedef STRUTIL_VECTOR<char>		char_vector_type;
+
+/** Vector of strings container type. */
+typedef STRUTIL_VECTOR<string_type>	string_vector_type;
+
+/** Size type used to access string characters by index. */
+typedef string_type::size_type		size_type;
 
 /** Character used to replace invalid UTF-8 data. */
-const unsigned UNICODE_REPLACEMENT_CHAR = 0x0000FFFD;
-
-/* Implementation-only: UTF-8 first byte encoding table. */
-static const unsigned char s_firstByteMarks[7] = { 0x00, 0x00, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC };
-
-/* Implementation-only: Magic values subtracted from a buffer value during uint8_t conversion. */
-static const unsigned s_offsetsFromUTF8[6] = { 0x00000000UL, 0x00003080UL, 0x000E2080UL, 0x03C82080UL, 0xFA082080UL, 0x82082080UL };
+const unsigned		UNICODE_REPLACEMENT_CHAR = 0x0000FFFD;
 
 /** 
  * Encodes Unicode codepoint to UTF-8. 
  * @param cp Unicode codepoint
- * @param target [out] Receives UTF-8 bytes, max 4, and terminates string with 0. Buffer size MUST be at least 5 bytes. Buffer receives UNICODE_REPLACEMENT_CHAR if input is invalid.
+ * @param target [out] Receives UTF-8 bytes. Buffer receives UNICODE_REPLACEMENT_CHAR if input is invalid. Buffer size must be at least 6 bytes.
  * @return No.of bytes encoded.
  */
-inline int u8_encode( unsigned ch, char* target )
-{
-	register int bytes = 0;
-	if ( ch < 0x80 )
-		bytes = 1;
-	else if ( ch < 0x800 ) 
-		bytes = 2;
-	else if ( ch < 0x10000 )
-		bytes = 3;
-	else if ( ch <= UNICODE_MAX_LEGAL_UTF32 )
-		bytes = 4;
-	else
-		bytes = 3, ch = UNICODE_REPLACEMENT_CHAR;
-
-	const unsigned bytemask = 0xBF;
-	const unsigned bytemark = 0x80;
-	target += bytes;
-	switch (bytes)
-	{
-	    case 4: *--target = (char)((ch | bytemark) & bytemask); ch >>= 6;
-	    case 3: *--target = (char)((ch | bytemark) & bytemask); ch >>= 6;
-	    case 2: *--target = (char)((ch | bytemark) & bytemask); ch >>= 6;
-	    case 1: *--target = (char) (ch | s_firstByteMarks[bytes]);
-	}
-	return bytes;
-}
-
-/**
- * Returns length in bytes of UTF-8 encoded codepoint.
- */
-template <class It> inline int u8_chsize( It source )
-{
-	const unsigned ch = (unsigned char)*source;
-	if ( ch < 192 )
-		return 1;
-	else if ( ch < 224 )
-		return 2;
-	else if ( ch < 240 )
-		return 3;
-	else if ( ch < 248 )
-		return 4;
-	else if ( ch < 252 )
-		return 5;
-	else
-		return 6;
-}
+int					u8_encode( unsigned ch, char* target );
 
 /**
  * Decodes UTF-8 to Unicode codepoint.
@@ -93,68 +45,128 @@ template <class It> inline int u8_chsize( It source )
  * @param bytes [out] Receives (if not nullptr) no.of bytes read.
  * @return Unicode codepoint.
  */
-template <class It> inline unsigned u8_decode( It source, int* bytes=0 )
-{
-	const int chsize = u8_chsize(source);
-	const int trail = chsize - 1;
-	register unsigned ch = 0;
-	switch (trail)
-	{
-	case 5: ch += (unsigned char)*source++; ch <<= 6;
-	case 4: ch += (unsigned char)*source++; ch <<= 6;
-	case 3: ch += (unsigned char)*source++; ch <<= 6;
-	case 2: ch += (unsigned char)*source++; ch <<= 6;
-	case 1: ch += (unsigned char)*source++; ch <<= 6;
-	case 0: ch += (unsigned char)*source++;
-	}
-	ch -= s_offsetsFromUTF8[trail];
+unsigned			u8_decode( const char* source, int* bytes=0 );
 
-	if (bytes)
-		*bytes = chsize;
-	return ch;
-}
+/**
+ * Returns length in bytes of UTF-8 encoded codepoint.
+ * Requirements: Derefencing operator must return type which can be casted to unsigned char.
+ */
+int					u8_chsize( const char* source );
 
 /** 
  * Returns nth Unicode codepoint from UTF-8 string.
+ * Requirements: String type must support begin() and end() and it must have const_iterator type defined.
  * Note: This convenience function is O(n) so use u8_decode as optimization if performance critical code or long strings.
  */
-template <class S> unsigned u8_get( const S& s, typename S::size_type n )
-{
-	S::const_iterator it = s.begin();
-	for ( S::size_type i = 0 ; i < n ; ++i )
-		it += u8_chsize( it );
-	return u8_decode(it);
-}
+unsigned			u8_get( const string_type& s, size_type n );
 
 /** 
  * Returns length of UTF-8 string in Unicode codepoints.
+ * Requirements: String type must support begin() and end() and it must have const_iterator type defined.
  */
-template <class S> typename S::size_type u8_len( const S& s )
+size_type			u8_len( const string_type& s );
+
+/**
+ * sprintf to string object.
+ */
+string_type			ssprintf( const char* fmt, ... );
+
+/**
+ * Trims whitespace off from both ends of the string.
+ */
+string_type			trim( const string_type& s );
+
+/**
+ * Trims whitespace off from the beginning of the string.
+ */
+string_type			ltrim( const string_type& s );
+
+/**
+ * Trims whitespace off from the end of the string.
+ */
+string_type			rtrim( const string_type& s );
+
+/**
+ * Returns string in uppercase.
+ */
+string_type			uppercase( const string_type& s );
+
+/**
+ * Returns string in lowercase.
+ */
+string_type			lowercase( const string_type& s );
+
+/**
+ * Split input string at delimeter string positions. Returns an array of strings.
+ */
+string_vector_type	explode( const string_type& delim, const string_type& input );
+
+/**
+ * Split input string at delimeter string positions. Returns an array of strings in out -container.
+ */
+template <class Cont> void explode( const string_type& delim, const string_type& input, Cont& out )	
 {
-	S::const_iterator it = s.begin();
-	S::const_iterator end = s.end();
-	S::size_type n = 0;
-	while ( it < end )
+	out.clear();
+	const char* delimsz = delim.c_str();
+	const size_type delimlen = delim.length();
+	const char* sz = input.c_str();
+
+	while ( *sz )
 	{
-		++n;
-		it += u8_chsize( it );
+		const char* end = strstr(sz,delimsz);
+		if ( 0 == end )
+		{
+			out.push_back( string_type(sz) );
+			break;
+		}
+
+		const size_t count = end - sz;
+		out.push_back( string_type(sz,count) );
+		sz += count + delimlen;
+		if ( !*sz )
+			out.push_back( string_type() );
 	}
-	return n;
 }
 
-/*
-trim
-ltrim
-rtrim
-explode
-implode
-strtolower
-strtoupper
-format
-*/
+/**
+ * Joins string elements in container by separator and returns combined string.
+ */
+template <class Cont> void implode( const string_type& separator, const Cont& elements, string_type& out )
+{
+	size_type sum = 1;
+	size_type num_elements = 0;
+	for ( typename Cont::const_iterator i = elements.begin() ; i != elements.end() ; ++i )
+	{
+		sum += i->length();
+		++num_elements;
+	}
+	sum += separator.length() * (num_elements-1);
+
+	char_vector_type vec;
+	vec.reserve( sum );
+	for ( typename Cont::const_iterator i = elements.begin() ; i != elements.end() ; ++i )
+	{
+		vec.insert( vec.end(), i->begin(), i->end() );
+		if ( --num_elements > 0 )
+			vec.insert( vec.end(), separator.begin(), separator.end() );
+	}
+	vec.push_back( 0 );
+
+	out = string_type( &vec[0] );
+}
+
+/**
+ * Joins string elements by separator and returns combined string.
+ */
+template <class Cont> string_type implode( const string_type& separator, const Cont& elements )
+{
+	string_type out;
+	implode( separator, elements, out );
+	return out;
+}
 
 } // str
 
 #endif // _STR_STRUTIL_H
 
-// strutil library is copyright (C) 2009-2011 Jani Kajala (kajala@gmail.com). Licensed under BSD/MIT license. See http://sourceforge.net/projects/strutil/
+// strutil library is copyright (C) 2009-2011 Jani Kajala (kajala@gmail.com). Licensed under BSD/MIT license. See http://code.google.com/p/strutil/

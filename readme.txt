@@ -1,13 +1,14 @@
 strutil -- Minimalistic library improving C++ string support with UTF-8 and string handling functions.
 
-The library is designed to be header-only and as easy as possible to integrate.
+The library is designed to be single cpp file only and as easy as possible to integrate.
 
 Supported (optional) config defines:
-STRUTIL_VECTOR -- uses std::vector if STRUTIL_VECTOR not defined
-STRUTIL_TOLOWER -- use default tolower if STRUTIL_TOLOWER not defined
-STRUTIL_TOUPPER -- uses default toupper if STRUTIL_TOUPPER not defined
+STRUTIL_STRING // strutil uses std::string if STRUTIL_STRING not defined
+STRUTIL_VECTOR // strutil uses std::vector if STRUTIL_VECTOR not defined
+STRUTIL_TOLOWER // strutil uses default tolower if STRUTIL_TOLOWER not defined
+STRUTIL_TOUPPER // strutil uses toupper if STRUTIL_TOUPPER not defined
 
 All functions are in str namespace.
 
 strutil library is copyright (C) 2009-2011 Jani Kajala (kajala@gmail.com).
-Licensed under BSD/MIT license. See http://sourceforge.net/projects/strutil/
+Licensed under BSD/MIT license. See http://code.google.com/p/strutil/
