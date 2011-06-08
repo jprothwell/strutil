@@ -10,6 +10,7 @@ STRUTIL_STRING // strutil uses std::string if STRUTIL_STRING not defined
 STRUTIL_VECTOR // strutil uses std::vector if STRUTIL_VECTOR not defined
 STRUTIL_TOLOWER // strutil uses default tolower if STRUTIL_TOLOWER not defined
 STRUTIL_TOUPPER // strutil uses toupper if STRUTIL_TOUPPER not defined
+STRUTIL_ISSPACE // strutil uses isspace if STRUTIL_STRUTIL not defined
 
 All functions are in str namespace.
 
