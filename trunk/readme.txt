@@ -1,4 +1,7 @@
-strutil -- Minimalistic library improving C++ string support with UTF-8 and string handling functions.
+strutil ver. 1.0.0
+********************
+
+Minimalistic library improving C++ string support with UTF-8 and string handling functions.
 
 The library is designed to be single cpp file only and as easy as possible to integrate.
 
