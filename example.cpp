@@ -92,6 +92,15 @@ void strutil_test()
 	check( e[2] == "markus" );
 	check( e[3] == "kajala" );
 	check( implode(",",e) == ",jani,markus,kajala" );
+
+	check( substr("abcd",1,2) == "bc" );
+	check( substr("abcd",1,3) == "bcd" );
+	check( substr("abcd",0,4) == "abcd" );
+	check( substr("abcd",-1) == "d" );
+	check( substr("abcd",0,-1) == "abc" );
+	check( substr("abcd",0,-2) == "ab" );
+	check( substr("myfile.dat",0,-4) == "myfile" );
+	check( substr("myfile.dat",-4) == ".dat" );
 }
 
 int main()

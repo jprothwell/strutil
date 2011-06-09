@@ -132,6 +132,14 @@ string_type			uppercase( const string_type& s );
 string_type			lowercase( const string_type& s );
 
 /**
+ * Substring function which supports offset wrapping and more flexible string length.
+ * If offset is negative, the returned string will start at the start 'th character from the end of string.
+ * If length is given and is negative, then that many characters will be omitted from the end of string.
+ * For example, substr("myfile.dat",-4) returns ".dat" and substr("myfile.dat",0,-4) returns "myfile".
+ */
+string_type			substr( const string_type& s, size_type offset, size_type count=0x80000000 );
+
+/**
  * Split input string at delimeter string positions. Returns an array of strings.
  */
 string_vector_type	explode( const string_type& delim, const string_type& input );
