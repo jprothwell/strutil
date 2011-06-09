@@ -232,6 +232,16 @@ string_type	to_utf8( const wstring_type& s )
 	return string_type( vec.begin(), vec.end() );
 }
 
+string_type	substr( const string_type& s, size_type offset, size_type count )
+{
+	const size_type len = s.length();
+	if ( offset >= len )
+		offset = (offset+len)%len;
+	if ( count >= len )
+		count = len+count-offset;
+	return s.substr( offset, count );
+}
+
 } // str
 
 // strutil library is copyright (C) 2009-2011 Jani Kajala (kajala@gmail.com). Licensed under BSD/MIT license. See http://code.google.com/p/strutil/
