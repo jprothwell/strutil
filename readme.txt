@@ -8,6 +8,8 @@ The library is designed to be single cpp file only and as easy as possible to in
 Supported (optional) config defines:
 STRUTIL_STRING // strutil uses std::string if STRUTIL_STRING not defined
 STRUTIL_VECTOR // strutil uses std::vector if STRUTIL_VECTOR not defined
+STRUTIL_WSTRING // strutil uses std::wstring if STRUTIL_WSTRING not defined
+STRUTIL_WCHAR // strutil uses wchar_t if STRUTIL_WCHAR not defined
 STRUTIL_TOLOWER // strutil uses default tolower if STRUTIL_TOLOWER not defined
 STRUTIL_TOUPPER // strutil uses toupper if STRUTIL_TOUPPER not defined
 STRUTIL_ISSPACE // strutil uses isspace if STRUTIL_STRUTIL not defined
