@@ -101,6 +101,9 @@ void strutil_test()
 	check( substr("abcd",0,-2) == "ab" );
 	check( substr("myfile.dat",0,-4) == "myfile" );
 	check( substr("myfile.dat",-4) == ".dat" );
+
+	check( replace("\\","/","C:\\dos\\path\\") == "C:/dos/path/" );
+	check( replace('\\','/',"C:\\dos\\path\\") == "C:/dos/path/" );
 }
 
 int main()
