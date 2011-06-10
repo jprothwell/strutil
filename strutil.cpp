@@ -242,6 +242,39 @@ string_type	substr( const string_type& s, size_type offset, size_type count )
 	return s.substr( offset, count );
 }
 
+string_type	replace( const string_type& needle, const string_type& target, const string_type& haystack, size_type n )
+{
+	const size_type len = haystack.length();
+	const size_type needle_len = needle.length();
+
+	char_vector_type vec;
+	vec.reserve( len+1 );
+	for ( size_type i = 0 ; i < len ; )
+	{
+		if ( !haystack.compare(i,needle_len,needle) )
+		{
+			vec.insert( vec.end(), target.begin(), target.end() );
+			i += needle_len;
+			if ( --n == 0 )
+				break;
+		}
+		else
+		{
+			vec.push_back( haystack.at(i++) );
+		}
+	}
+	return string_type( vec.begin(), vec.end() );
+}
+
+string_type	replace( char needle, char target, const string_type& haystack, size_type n )
+{
+	const size_type len = haystack.length();
+	char_vector_type vec( len );
+	for ( size_type i = 0 ; i < len ; ++i )
+		vec[i] = ( haystack[i]==needle ? target : haystack[i] );
+	return string_type( vec.begin(), vec.end() );
+}
+
 } // str
 
 // strutil library is copyright (C) 2009-2011 Jani Kajala (kajala@gmail.com). Licensed under BSD/MIT license. See http://code.google.com/p/strutil/

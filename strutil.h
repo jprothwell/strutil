@@ -140,6 +140,16 @@ string_type			lowercase( const string_type& s );
 string_type			substr( const string_type& s, size_type offset, size_type count=0x80000000 );
 
 /**
+ * Finds maximum of n (0 if all) instances of needle from haystack and replaces them with target.
+ */
+string_type			replace( const string_type& needle, const string_type& target, const string_type& haystack, size_type n=0 );
+
+/**
+ * Finds maximum of n (0 if all) instances of needle from haystack and replaces them with target.
+ */
+string_type			replace( char needle, char target, const string_type& haystack, size_type n=0 );
+
+/**
  * Split input string at delimeter string positions. Returns an array of strings.
  */
 string_vector_type	explode( const string_type& delim, const string_type& input );
