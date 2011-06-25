@@ -275,6 +275,42 @@ string_type	replace( char needle, char target, const string_type& haystack, size
 	return string_type( vec.begin(), vec.end() );
 }
 
+inline static bool sep( char ch )
+{
+	return ch == '/' || ch == '\\';
+}
+
+string_type	basename( const string_type& path, const string_type& suffix )
+{
+	// cut terminating dir separator
+	size_type len = path.length();
+	if ( len > 0 && sep(path[len-1]) )
+		--len;
+
+	// cut suffix if specified and matches
+	size_type suffix_len = suffix.length();
+	const size_type suffix_offset = len - suffix_len;
+	for ( size_type k = 0 ; k < suffix_len ; ++k )
+	{
+		if ( path[suffix_offset+k] != suffix[k] )
+		{
+			suffix_len = 0;
+			break;
+		}
+	}
+	len -= suffix_len;
+
+	// cut basename
+	size_type i = len;
+	while ( i > 0 )
+	{
+		if ( sep(path[i-1]) )
+			break;
+		--i;
+	}
+	return path.substr( i, len-i );
+}
+
 } // str
 
 // strutil library is copyright (C) 2009-2011 Jani Kajala (kajala@gmail.com). Licensed under BSD/MIT license. See http://code.google.com/p/strutil/
