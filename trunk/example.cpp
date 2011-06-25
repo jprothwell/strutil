@@ -104,6 +104,12 @@ void strutil_test()
 
 	check( replace("\\","/","C:\\dos\\path\\") == "C:/dos/path/" );
 	check( replace('\\','/',"C:\\dos\\path\\") == "C:/dos/path/" );
+
+	check( basename("test.tmp") == "test.tmp" );
+	check( basename("test.tmp",".tmp") == "test" );
+	check( basename("a/b/test.tmp") == "test.tmp" );
+	check( basename("a/b/test.tmp/") == "test.tmp" );
+	check( basename("a/b/test.tmp/ ") == " " );
 }
 
 int main()

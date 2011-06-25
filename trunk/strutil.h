@@ -150,6 +150,12 @@ string_type			replace( const string_type& needle, const string_type& target, con
 string_type			replace( char needle, char target, const string_type& haystack, size_type n=0 );
 
 /**
+ * Finds last occurence of directory separator and returns path name after that.
+ * Optionally cuts specified suffix from the end.
+ */
+string_type			basename( const string_type& path, const string_type& suffix="" );
+
+/**
  * Split input string at delimeter string positions. Returns an array of strings.
  */
 string_vector_type	explode( const string_type& delim, const string_type& input );
