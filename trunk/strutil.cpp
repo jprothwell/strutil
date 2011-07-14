@@ -311,6 +311,29 @@ string_type	basename( const string_type& path, const string_type& suffix )
 	return path.substr( i, len-i );
 }
 
+string_type	dirname( const string_type& path )
+{
+	// cut terminating dir separator if any
+	size_type len = path.length();
+	if ( !len )
+		return path;
+	if ( len > 0 && sep(path[len-1]) )
+		--len;
+	if ( !len )
+		return path; // dir separator only
+
+	// find prev dir separator
+	size_t i = len;
+	while ( i > 0 && !sep(path[i-1]) )
+		--i;
+	if ( !i )
+		return ".";
+	if ( --i == 0 )
+		return "/";
+
+	return path.substr( 0, i );
+}
+
 } // str
 
 // strutil library is copyright (C) 2009-2011 Jani Kajala (kajala@gmail.com). Licensed under BSD/MIT license. See http://code.google.com/p/strutil/

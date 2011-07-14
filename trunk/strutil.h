@@ -156,6 +156,20 @@ string_type			replace( char needle, char target, const string_type& haystack, si
 string_type			basename( const string_type& path, const string_type& suffix="" );
 
 /**
+ * Finds last occurence of directory separator and returns path name before that.
+ * Never returns the terminating / unless the directory name is the root.
+ * Examples:
+ *	dirname("") == ""
+ *	dirname(" ") == "."
+ *	dirname("/") == "/"
+ *	dirname("asdasd") == "."
+ *	dirname("/asdasd") == "/"
+ *	dirname("/asd/adas") == "/asd"
+ *	dirname("/asda/asd/") == "/asda"
+ */
+string_type			dirname( const string_type& path );
+
+/**
  * Split input string at delimeter string positions. Returns an array of strings.
  */
 string_vector_type	explode( const string_type& delim, const string_type& input );

@@ -110,6 +110,15 @@ void strutil_test()
 	check( basename("a/b/test.tmp") == "test.tmp" );
 	check( basename("a/b/test.tmp/") == "test.tmp" );
 	check( basename("a/b/test.tmp/ ") == " " );
+
+	check( dirname("") == "" );
+	check( dirname("/") == "/" );
+	check( dirname(" ") == "." );
+	check( dirname("asdasd") == "." );
+	check( dirname("asdasd/") == "." );
+	check( dirname("/asdasd") == "/" );
+	check( dirname("/asd/adas") == "/asd" );
+	check( dirname("/asda/asd/") == "/asda" );
 }
 
 int main()
