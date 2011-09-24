@@ -145,7 +145,7 @@ string_type			lowercase( const string_type& s );
  * For example, substr("myfile.dat",-4) returns ".dat" and substr("myfile.dat",0,-4) returns "myfile".
  */
 string_type			substr( const string_type& s, size_type offset, size_type count=0x80000000 );
-inline string_type	substr( const string_type& s, int offset, int count=0x80000000 )					{return substr(s,size_type(offset),size_type(count);}
+inline string_type	substr( const string_type& s, int offset, int count=0x80000000 )					{return substr(s,size_type(offset),size_type(count));}
 
 /**
  * Finds maximum of n (0 if all) instances of needle from haystack and replaces them with target.
