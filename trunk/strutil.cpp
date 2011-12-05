@@ -235,6 +235,8 @@ string_type	to_utf8( const wstring_type& s )
 string_type	substr( const string_type& s, size_type offset, size_type count )
 {
 	const size_type len = s.length();
+	if ( !len )
+		return s;
 	if ( offset >= len )
 		offset = (offset+len)%len;
 	if ( count >= len )
