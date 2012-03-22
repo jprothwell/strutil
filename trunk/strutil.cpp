@@ -273,7 +273,19 @@ string_type	replace( char needle, char target, const string_type& haystack, size
 	const size_type len = haystack.length();
 	char_vector_type vec( len );
 	for ( size_type i = 0 ; i < len ; ++i )
-		vec[i] = ( haystack[i]==needle ? target : haystack[i] );
+	{
+		const char src = haystack[i];
+		if ( src == needle )
+		{
+			vec[i] = target;
+			if ( --n == 0 )
+				break;
+		}
+		else
+		{
+			vec[i] = src;
+		}
+	}
 	return string_type( vec.begin(), vec.end() );
 }
 
