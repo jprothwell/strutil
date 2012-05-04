@@ -298,7 +298,9 @@ string_type	basename( const string_type& path, const string_type& suffix )
 {
 	// cut terminating dir separator
 	size_type len = path.length();
-	if ( len > 0 && sep(path[len-1]) )
+	if ( !len )
+		return path;
+	if ( sep(path[len-1]) )
 		--len;
 
 	// cut suffix if specified and matches
